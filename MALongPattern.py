@@ -49,7 +49,7 @@ class MALongPattern(Strategy):
                 bought_in = False
                 position = 0
             if data.loc[row, 'signal'] == 1:
-                bought_in = True #636062333
+                bought_in = True
                 position = 1
             data.loc[row, 'position'] = position
             
@@ -57,8 +57,12 @@ class MALongPattern(Strategy):
         data['return'] = np.log(data['Close'] / data['Close'].shift(1)) #calculate return
         data['strategy'] = data['position'] * data['return'] # calculate strategy
         
+        data['signal'].fillna(0, inplace=True)
+        #adjust return on the day that stocks are bought, as it's buying at Close price,
+        buys = data['signal'] == 1
+        data['strategy'][buys] = 0
         #adjust return on the day that stocks are sold, because it's using exitPrice instead of Close price
-        sells = data['signal'].fillna(False) == -1 
+        sells = data['signal'] == -1 
         data['strategy'][sells] = \
             data['position'][sells] * \
             np.log(data['exitPrice'][sells] / data['Close'].shift(1)[sells])
