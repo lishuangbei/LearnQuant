@@ -25,7 +25,7 @@ class MALongPattern(Strategy):
                 row['sma5']  > row['sma13'],
                 row['sma13'] > row['sma34'],
                 row['sma34'] > row['sma55'],
-                row['sma55'] > row['sma233']
+                #row['sma55'] > row['sma233']
             ]
             return all(rules)
         data['position'] = np.where(
@@ -40,7 +40,7 @@ class MALongPattern(Strategy):
         data['signal'].replace(-1, 0)
         
         # recalculate sell signal and position
-        data['exitPrice'] = data['sma5'] + (data['Close'] - data['close_5_days_ago']) / 5
+        data['exitPrice'] = np.minimum(data['sma5'] + (data['Close'] - data['close_5_days_ago']) / 5, data['Open'])
         bought_in = False
         position = 0
         for row in data.index:
