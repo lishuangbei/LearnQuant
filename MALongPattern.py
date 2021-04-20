@@ -58,11 +58,14 @@ class MALongPattern(Strategy):
         data['strategy'] = data['position'] * data['return'] # calculate strategy
         
         data['signal'].fillna(0, inplace=True)
+
         #adjust return on the day that stocks are bought, as it's buying at Close price,
-        buys = data['signal'] == 1
-        data['strategy'][buys] = 0
+        #buys = data['signal'] == 1
+        #data['strategy'][buys] = 0
+
         #adjust return on the day that stocks are sold, because it's using exitPrice instead of Close price
-        sells = data['signal'] == -1 
+        sells = data['signal'].fillna(False) == -1
+
         data['strategy'][sells] = \
             data['position'][sells] * \
             np.log(data['exitPrice'][sells] / data['Close'].shift(1)[sells])
@@ -81,5 +84,5 @@ class MALongPattern(Strategy):
         aperf = self.results['cstrategy'].iloc[-1]
         # out/under-performance of strategy
         operf = aperf - self.results['creturns'].iloc[-1]
-        
+        print(f"{aperf}, {operf}")
         return round(aperf, 2), round(operf, 2)
