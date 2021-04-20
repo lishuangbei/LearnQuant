@@ -141,8 +141,6 @@ class MALongPattern(Strategy):
                 data['signal'][row] = 0
                 data['position'][row] = 1
                 data['strategy'][row] = data['return'][row]
-                print("return: %f" % data['return'][row])
-                print("strategy: %f" % data['strategy'][row])
         #data['strategy'][data['signal'] != 0] -= self.tc 
         
         # calculate accumulative returns and strategy
@@ -156,3 +154,48 @@ class MALongPattern(Strategy):
         operf = aperf - self.results['creturns'].iloc[-1]
         print(f"{aperf}, {operf}")
         return round(aperf, 2), round(operf, 2)
+
+    def analyze(self):
+        # look at the enter points. see if we can find a better enter strategy
+        data = self.results
+        columns = ['buy_price', 'sell_price', 'volume_at_buy_day', 'period', 'return']
+        df = pd.DataFrame(columns=columns)
+        daycount = 0
+        ret = 0
+        for row in data.index:
+            seri = data.loc[row]
+            if seri['signal'] == 1:
+                daycount = 0
+                buy_price = seri['Close']
+                volume = seri['Volume']
+                ret += seri['strategy']
+            elif seri['signal'] == -1:
+                daycount += 1
+                sell_price = seri['exitPrice']
+                ret += seri['strategy']
+                df.append(
+                    {
+                        'buy_price': buy_price,
+                        'sell_price': sell_price,
+                        'volume_at_buy_day': volume,
+                        'period': daycount,
+                        'return': ret
+                    },
+                    ignore_index=True
+                )
+            elif seri['position'] == 1:
+                daycount += 1
+                ret += seri['strategy']
+        return df
+
+if __name__ == '__main__':
+    symbol = 'AAPL'#, 'AMD', 'FAS', 'GE', 'JPM']
+
+    start = '2016-10-1'
+    end = '2021-1-1'
+    t = 0.0
+    amnt = 10000
+    MALP = MALongPattern(symbol, start, end, amnt, t)
+    MALP.run_strategy2()
+    analyze_result = MALP.analyze()
+    analyze_result.to_csv("analyze_aapl.csv")

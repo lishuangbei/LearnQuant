@@ -70,6 +70,39 @@ class MALongPattern_Combined_Stocks():
     def plot(self):
         self.results['cstrategy'].plot(figsize=(16,8))
 
+    def analyze(self):
+        # look at the enter points. see if we can find a better enter strategy
+        # data = self.results
+        # columns = ['buy_price', 'sell_price', 'volume_at_buy_day', 'period', 'return']
+        # df = pd.DataFrame(columns=columns)
+        # daycount = 0
+        # ret = 0
+        # for row in data.index:
+        #     seri = data.loc[row]
+        #     if seri['signal'] == 1:
+        #         daycount = 0
+        #         buy_price = seri['Close']
+        #         volume = seri['volume']
+        #         ret += seri['strategy']
+        #     elif seri['signal'] == -1:
+        #         daycount += 1
+        #         sell_price = seri['exitPrice']
+        #         ret += seri['strategy']
+        #         df.append(
+        #             {
+        #                 'buy_price': buy_price,
+        #                 'sell_price': sell_price,
+        #                 'volume_at_buy_day': volume,
+        #                 'period': daycount,
+        #                 'return': ret
+        #             }
+        #         )
+        #     elif seri['position'] == 1:
+        #         daycount += 1
+        #         ret += seri['strategy']
+        # df = 
+        return df
+
 if __name__ == '__main__':
     stock_list = ['AAPL']#, 'AMD', 'FAS', 'GE', 'JPM']
     MALP_CS = MALongPattern_Combined_Stocks(stock_list)
@@ -81,3 +114,5 @@ if __name__ == '__main__':
     MALP_CS.run_strategy(start, end, amnt, t)
     print(MALP_CS.results['cstrategy'][-1])
     MALP_CS.df_dict['AAPL'].to_csv("aapl.csv")
+    analyze_result = MALP_CS.analyze()
+    analyze_result.to_csv('analyze.csv')
