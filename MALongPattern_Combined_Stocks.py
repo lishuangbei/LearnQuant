@@ -26,7 +26,7 @@ class MALongPattern_Combined_Stocks():
 
         for ticker in self.stock_list:
             strategy = MALP(ticker, start, end, amount, tc)
-            strategy.run_strategy()
+            strategy.run_strategy2()
             #either use this
             self.df_position[ticker] = strategy.results['position']
             self.df_position.fillna(0, inplace = True)
@@ -80,4 +80,4 @@ if __name__ == '__main__':
     amnt = 10000
     MALP_CS.run_strategy(start, end, amnt, t)
     print(MALP_CS.results['cstrategy'][-1])
-    
+    MALP_CS.df_dict['AAPL'].to_csv("aapl.csv")
