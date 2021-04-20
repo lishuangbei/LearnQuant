@@ -37,6 +37,7 @@ class MALongPattern_Combined_Stocks():
                 buy_date = date
                 ticker = self.pick_a_ticker(date)
                 fund_occupied = True
+                self.results['signal'][date] = 1
             if fund_occupied and self.df_signal.loc[date,ticker] == -1:
                 sell_date = date
                 fund_occupied = False
@@ -60,7 +61,7 @@ class MALongPattern_Combined_Stocks():
         self.results['cstrategy'].plot(figsize=(16,8))
 
 if __name__ == '__main__':
-    stock_list = ['AAPL']#, 'AMD', 'FAS', 'GE', 'JPM']
+    stock_list = ['AAPL', 'AMD', 'FAS', 'GE', 'JPM']
     MALP_CS = MALongPattern_Combined_Stocks(stock_list)
 
     start = '2017-1-1'
