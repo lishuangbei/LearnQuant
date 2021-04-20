@@ -60,16 +60,16 @@ class MALongPattern(Strategy):
         data['signal'].fillna(0, inplace=True)
 
         #adjust return on the day that stocks are bought, as it's buying at Close price,
-        #buys = data['signal'] == 1
-        #data['strategy'][buys] = 0
+        buys = (data['signal'] == 1)
+        data['strategy'][buys] = 0
 
         #adjust return on the day that stocks are sold, because it's using exitPrice instead of Close price
-        sells = data['signal'].fillna(False) == -1
-
+        sells = (data['signal'] == -1)
+        data['position'][sells] = 1
         data['strategy'][sells] = \
             data['position'][sells] * \
             np.log(data['exitPrice'][sells] / data['Close'].shift(1)[sells])
-        data['position'][sells] = 1
+        
         
         # adjust strategy considering TC
         trades = data['signal'].dropna() != 0

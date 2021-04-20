@@ -6,10 +6,17 @@ from Strategy import Strategy
 
 class MALongPattern_Combined_Stocks():
     def __init__(self, stock_list=[]):
-        self.stock_list = stock_list
-    
+        self.update_stock_list(stock_list)
+        
+    def create_df_dictionary(self):
+        stock_list = self.stock_list
+        self.df_dict = dict(zip(stock_list, [pd.DataFrame()]*len(stock_list)))
+
     def update_stock_list(self, new_list):
+        if len(new_list) == 0:
+            print("stock_list is empty, please use self.update_stock_list(list) to add.")
         self.stock_list = new_list
+        self.create_df_dictionary()
 
     def get_datas(self, start, end, amount, tc):
         self.df_position = pd.DataFrame(columns = self.stock_list)
@@ -20,11 +27,14 @@ class MALongPattern_Combined_Stocks():
         for ticker in self.stock_list:
             strategy = MALP(ticker, start, end, amount, tc)
             strategy.run_strategy()
+            #either use this
             self.df_position[ticker] = strategy.results['position']
             self.df_position.fillna(0, inplace = True)
             self.df_strategy[ticker] = strategy.results['strategy']
             self.df_return[ticker] = strategy.results['return']
             self.df_signal[ticker] = strategy.results['signal']
+            #or use this
+            self.df_dict[ticker] = strategy.results
         
     def run_strategy(self, start, end, amount, tc):
         self.get_datas(start, end, amount, tc)
@@ -38,7 +48,7 @@ class MALongPattern_Combined_Stocks():
                 ticker = self.pick_a_ticker(date)
                 fund_occupied = True
                 self.results['signal'][date] = 1
-            if fund_occupied and self.df_signal.loc[date,ticker] == -1:
+            elif fund_occupied and self.df_signal.loc[date,ticker] == -1:
                 sell_date = date
                 fund_occupied = False
                 self.results.loc[buy_date:sell_date, 'strategy'] = self.df_strategy.loc[buy_date:sell_date, ticker]
@@ -61,12 +71,13 @@ class MALongPattern_Combined_Stocks():
         self.results['cstrategy'].plot(figsize=(16,8))
 
 if __name__ == '__main__':
-    stock_list = ['AAPL', 'AMD', 'FAS', 'GE', 'JPM']
+    stock_list = ['AAPL']#, 'AMD', 'FAS', 'GE', 'JPM']
     MALP_CS = MALongPattern_Combined_Stocks(stock_list)
 
-    start = '2017-1-1'
-    end = '2021-4-16'
+    start = '2016-10-1'
+    end = '2021-1-1'
     t = 0.0
     amnt = 10000
     MALP_CS.run_strategy(start, end, amnt, t)
-    MALP_CS.plot()
+    print(MALP_CS.results['cstrategy'][-1])
+    
