@@ -115,15 +115,16 @@ class MALongPattern(Strategy):
                 row['sma5']  > row['sma13'],
                 row['sma13'] > row['sma34'],
                 row['sma34'] > row['sma55'],
-                row['Close'] > row['Open'],
-                row['sma55'] > row['sma233']
+                #row['sma55'] > row['sma233']
             ]
             return all(rules)
         data['exitPrice'] = np.minimum(data['sma5'] + (data['Close'] - data['close_5_days_ago']) / 5, data['Open'])
         #try new loop
-        def exitStrategy(index):
+        def exitStrategy(index, buy_price):
+            result = False
             row = data.loc[index]
-            exitPrice = np.minimum(row['sma5'] + (row['Close'] - row['close_5_days_ago']) / 5, row['Open'])
+            stop_loss = np.minimum(row['sma5'] + (row['Close'] - row['close_5_days_ago']) / 5, row['Open'])
+            stop_profit = buy_price * 1.05
             return row['Low'] < (row['sma5'] + (row['Close'] - row['close_5_days_ago']) / 5)
         bought_in = False
         position = 0
@@ -132,8 +133,8 @@ class MALongPattern(Strategy):
                 data['signal'][row] = 1
                 data['position'][row] = 1
                 data['strategy'][row] = 0
-                buy_price = data['Close']
                 bought_in = True
+                buy_price = data['Close']
             elif bought_in and exitStrategy(row, buy_price):
                 data['signal'][row] = -1
                 data['position'][row] = 1
