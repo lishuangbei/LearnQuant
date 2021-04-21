@@ -158,34 +158,44 @@ class MALongPattern(Strategy):
     def analyze(self):
         # look at the enter points. see if we can find a better enter strategy
         data = self.results
-        columns = ['buy_price', 'sell_price', 'volume_at_buy_day', 'period', 'return']
+        columns = ['buy_price', 'buy_date', 'sell_price', 'volume_at_buy_day', 'period', 'return', 'max_return']
         df = pd.DataFrame(columns=columns)
         daycount = 0
         ret = 0
+        high = 0
+        
         for row in data.index:
             seri = data.loc[row]
             if seri['signal'] == 1:
                 daycount = 0
                 buy_price = seri['Close']
+                buy_date = row
                 volume = seri['Volume']
                 ret += seri['strategy']
             elif seri['signal'] == -1:
                 daycount += 1
                 sell_price = seri['exitPrice']
                 ret += seri['strategy']
-                df.append(
+                max_return = np.log(high / buy_price)
+                df = df.append(
                     {
                         'buy_price': buy_price,
+                        'buy_date': buy_date,
                         'sell_price': sell_price,
                         'volume_at_buy_day': volume,
                         'period': daycount,
-                        'return': ret
+                        'return': ret,
+                        'max_return': max_return
                     },
                     ignore_index=True
                 )
+                #reset
+                ret = 0
+                high = max(high, seri['High'])
             elif seri['position'] == 1:
                 daycount += 1
                 ret += seri['strategy']
+                high = max(high, seri['High'])
         return df
 
 if __name__ == '__main__':
